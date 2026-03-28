@@ -8,3 +8,5 @@
 2026-03-03 13:08:08,767 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
 2026-03-28 22:39:43,538 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
 2026-03-28 22:40:04,371 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
+2026-03-28 22:57:49,821 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-28 22:58:11,833 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries

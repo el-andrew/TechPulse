@@ -16,7 +16,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  dashboard:
+  migrate:
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,9 +36,27 @@ services:
       DASHBOARD_PORT: 8080
       DASHBOARD_TITLE: ${DASHBOARD_TITLE:-Tech Pulse Command Center}
       DASHBOARD_REFRESH_SECONDS: ${DASHBOARD_REFRESH_SECONDS:-60}
-      RUN_INIT_DB: "1"
+      RUN_INIT_DB: "0"
       INIT_DB_ATTEMPTS: ${INIT_DB_ATTEMPTS:-20}
       INIT_DB_DELAY_SECONDS: ${INIT_DB_DELAY_SECONDS:-3}
+    command: ["python", "-m", "app.main", "init-db"]
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+    image: tech-pulse-engine:${IMAGE_TAG:-latest}
+    environment:
+      <<: *app_environment
     command: ["python", "-m", "app.main", "serve-dashboard", "--host", "0.0.0.0", "--port", "8080"]
     ports:
       - "${DASHBOARD_PORT:-8080}:8080"
@@ -48,6 +66,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/healthz || exit 1"]
       interval: 30s
@@ -71,6 +91,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   app-runner:
@@ -90,6 +112,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: "no"
 
 volumes:

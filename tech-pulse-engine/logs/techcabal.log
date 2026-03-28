@@ -8,3 +8,5 @@
 2026-03-03 13:06:25,583 INFO [tech_pulse.source.techcabal] Collected 10 RSS entries
 2026-03-28 22:38:40,999 INFO [tech_pulse.source.techcabal] Fetching RSS feed: https://techcabal.com/feed/
 2026-03-28 22:38:45,007 ERROR [tech_pulse.source.techcabal] Failed to fetch https://techcabal.com/feed/: HTTPSConnectionPool(host='techcabal.com', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError("HTTPSConnection(host='techcabal.com', port=443): Failed to resolve 'techcabal.com' ([Errno -5] No address associated with hostname)"))
+2026-03-28 22:56:22,071 INFO [tech_pulse.source.techcabal] Fetching RSS feed: https://techcabal.com/feed/
+2026-03-28 22:56:25,012 INFO [tech_pulse.source.techcabal] Collected 10 RSS entries

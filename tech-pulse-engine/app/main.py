@@ -7,6 +7,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 
 from app.config.settings import DEFAULT_SOURCES_PATH, load_settings
 from app.dashboard.app import serve_dashboard
+from app.db.migrations import upgrade_database
 from app.db.session import create_session_factory
 from app.notify.logging import configure_logging
 from app.services.pipeline import PipelineService
@@ -63,14 +64,14 @@ def build_parser() -> argparse.ArgumentParser:
     dashboard_parser.add_argument("--host", default=settings.dashboard_host)
     dashboard_parser.add_argument("--port", type=int, default=settings.dashboard_port)
 
-    subparsers.add_parser("init-db", help="Initialize the configured database")
+    subparsers.add_parser("init-db", help="Apply database migrations")
     return parser
 
 
 def init_db() -> int:
     settings = load_settings()
     configure_logging(settings.log_level)
-    create_session_factory(settings.database_url)
+    upgrade_database(settings.database_url)
     print(f"Database initialized at {settings.database_url}")
     return 0
 

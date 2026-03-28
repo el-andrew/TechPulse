@@ -8,3 +8,5 @@
 2026-03-03 13:06:28,094 INFO [tech_pulse.source.ventureburn] Collected 10 RSS entries
 2026-03-28 22:38:49,056 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
 2026-03-28 22:38:53,068 ERROR [tech_pulse.source.ventureburn] Failed to fetch https://ventureburn.com/feed/: HTTPSConnectionPool(host='ventureburn.com', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError("HTTPSConnection(host='ventureburn.com', port=443): Failed to resolve 'ventureburn.com' ([Errno -5] No address associated with hostname)"))
+2026-03-28 22:56:27,679 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
+2026-03-28 22:56:29,068 INFO [tech_pulse.source.ventureburn] Collected 10 RSS entries

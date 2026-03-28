@@ -9,3 +9,5 @@
 2026-03-28 22:39:13,204 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
 2026-03-28 22:39:17,209 ERROR [tech_pulse.source.cisco-networking-academy] Failed to fetch https://www.netacad.com/sitemap.xml: HTTPSConnectionPool(host='www.netacad.com', port=443): Max retries exceeded with url: /sitemap.xml (Caused by NameResolutionError("HTTPSConnection(host='www.netacad.com', port=443): Failed to resolve 'www.netacad.com' ([Errno -5] No address associated with hostname)"))
 2026-03-28 22:39:17,210 INFO [tech_pulse.source.cisco-networking-academy] Collected 0 HTML entries
+2026-03-28 22:57:08,913 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-28 22:57:29,498 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries

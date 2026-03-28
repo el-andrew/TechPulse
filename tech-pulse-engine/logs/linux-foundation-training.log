@@ -9,3 +9,5 @@
 2026-03-28 22:39:05,158 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
 2026-03-28 22:39:09,170 ERROR [tech_pulse.source.linux-foundation-training] Failed to fetch https://trainingportal.linuxfoundation.org/sitemap.xml: HTTPSConnectionPool(host='trainingportal.linuxfoundation.org', port=443): Max retries exceeded with url: /sitemap.xml (Caused by NameResolutionError("HTTPSConnection(host='trainingportal.linuxfoundation.org', port=443): Failed to resolve 'trainingportal.linuxfoundation.org' ([Errno -5] No address associated with hostname)"))
 2026-03-28 22:39:09,173 INFO [tech_pulse.source.linux-foundation-training] Collected 0 HTML entries
+2026-03-28 22:56:35,799 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-28 22:57:06,717 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries

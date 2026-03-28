@@ -9,3 +9,5 @@
 2026-03-28 22:39:09,187 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
 2026-03-28 22:39:13,194 ERROR [tech_pulse.source.google-skills] Failed to fetch https://www.skills.google/catalog: HTTPSConnectionPool(host='www.skills.google', port=443): Max retries exceeded with url: /catalog (Caused by NameResolutionError("HTTPSConnection(host='www.skills.google', port=443): Failed to resolve 'www.skills.google' ([Errno -5] No address associated with hostname)"))
 2026-03-28 22:39:13,195 INFO [tech_pulse.source.google-skills] Collected 0 HTML entries
+2026-03-28 22:57:06,728 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-28 22:57:08,908 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries

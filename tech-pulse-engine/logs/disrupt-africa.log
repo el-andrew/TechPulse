@@ -6,3 +6,5 @@
 2026-03-03 13:02:21,686 INFO [tech_pulse.source.disrupt-africa] Collected 10 RSS entries
 2026-03-03 13:06:25,585 INFO [tech_pulse.source.disrupt-africa] Fetching RSS feed: https://disrupt-africa.com/feed/
 2026-03-03 13:06:26,985 INFO [tech_pulse.source.disrupt-africa] Collected 10 RSS entries
+2026-03-28 22:38:45,031 INFO [tech_pulse.source.disrupt-africa] Fetching RSS feed: https://disrupt-africa.com/feed/
+2026-03-28 22:38:49,042 ERROR [tech_pulse.source.disrupt-africa] Failed to fetch https://disrupt-africa.com/feed/: HTTPSConnectionPool(host='disrupt-africa.com', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError("HTTPSConnection(host='disrupt-africa.com', port=443): Failed to resolve 'disrupt-africa.com' ([Errno -5] No address associated with hostname)"))

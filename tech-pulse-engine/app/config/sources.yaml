@@ -1,0 +1,118 @@
+sources:
+  - name: TechCabal
+    type: rss
+    url: https://techcabal.com/feed/
+    category_hint: news
+    africa_relevance_weight: 0.9
+    options:
+      max_entries: 20
+
+  - name: Disrupt Africa
+    type: rss
+    url: https://disrupt-africa.com/feed/
+    category_hint: accelerator
+    africa_relevance_weight: 0.95
+    options:
+      max_entries: 20
+
+  - name: Ventureburn
+    type: rss
+    url: https://ventureburn.com/feed/
+    category_hint: startup
+    africa_relevance_weight: 0.9
+    options:
+      max_entries: 20
+
+  - name: Opportunities for Africans
+    type: rss
+    url: https://www.opportunitiesforafricans.com/feed/
+    category_hint: scholarship
+    africa_relevance_weight: 0.95
+    options:
+      max_entries: 25
+
+  - name: Opportunity Desk
+    type: rss
+    url: https://opportunitydesk.org/feed/
+    category_hint: scholarship
+    africa_relevance_weight: 0.88
+    options:
+      max_entries: 25
+
+  - name: AfriLabs
+    type: rss
+    url: https://www.afrilabs.com/feed/
+    category_hint: accelerator
+    africa_relevance_weight: 0.9
+    options:
+      max_entries: 20
+
+  - name: Linux Foundation Training
+    type: html
+    url: https://trainingportal.linuxfoundation.org/catalog
+    category_hint: training
+    africa_relevance_weight: 0.8
+    strategy: sitemap_detail
+    options:
+      sitemap_url: https://trainingportal.linuxfoundation.org/sitemap.xml
+      include_patterns:
+        - /courses/
+      exclude_patterns:
+        - /learn/video/
+        - /collections/
+        - /bundles/
+      generic_titles:
+        - The Linux Foundation
+      generic_descriptions:
+        - The Linux Foundation online learning classes
+      max_items: 15
+
+  - name: Google Skills
+    type: html
+    url: https://www.skills.google/catalog
+    category_hint: training
+    africa_relevance_weight: 0.85
+    strategy: google_skills_catalog
+    options:
+      max_items: 18
+
+  - name: Cisco Networking Academy
+    type: html
+    url: https://www.netacad.com/catalogs/learn
+    category_hint: training
+    africa_relevance_weight: 0.85
+    strategy: sitemap_detail
+    options:
+      sitemap_url: https://www.netacad.com/sitemap.xml
+      include_patterns:
+        - /courses/
+      exclude_patterns:
+        - ?courseLang=
+      max_items: 18
+
+  - name: Microsoft Learn Events
+    type: html
+    url: https://events.microsoft.com
+    category_hint: event
+    africa_relevance_weight: 0.8
+    strategy: microsoft_events
+    options:
+      seed_urls:
+        - https://www.microsoft.com/en/events/category/microsoft-virtual-training-days
+        - https://www.microsoft.com/en/events/category/microsoft-365-copilot-training
+        - https://www.microsoft.com/en/events/category/industry-events
+        - https://ignite.microsoft.com/home
+        - https://aitour.microsoft.com/flow/microsoft/aitour/landing/page/home
+        - https://build.microsoft.com/home
+
+  - name: ISC2 Programs
+    type: html
+    url: https://www.isc2.org/landing
+    category_hint: certification
+    africa_relevance_weight: 0.85
+    strategy: isc2_programs
+    options:
+      seed_urls:
+        - https://www.isc2.org/landing
+        - https://www.isc2.org/training/online-instructor-led
+      max_items: 10

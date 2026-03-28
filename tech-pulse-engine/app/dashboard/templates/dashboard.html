@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="{{ settings.dashboard_refresh_seconds }}">
+    <title>{{ settings.dashboard_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='dashboard.css') }}">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">Operations Console</p>
+          <h1>{{ settings.dashboard_title }}</h1>
+          <p class="lede">Monitor ingestion health, source reliability, qualification throughput, and publishing readiness from a single control surface.</p>
+        </div>
+        <div class="hero-meta">
+          <span class="badge badge-{{ snapshot.last_run.status if snapshot.last_run else 'idle' }}">{{ snapshot.last_run.status if snapshot.last_run else 'idle' }}</span>
+          <p>Refresh cadence: {{ settings.dashboard_refresh_seconds }}s</p>
+          <p>Generated: {{ snapshot.generated_at or 'n/a' }}</p>
+        </div>
+      </header>
+
+      <section class="metrics-grid">
+        <article class="metric card accent-teal">
+          <span class="metric-label">Stored Opportunities</span>
+          <strong>{{ snapshot.metrics.opportunities_total }}</strong>
+          <span class="metric-foot">Draft queue: {{ snapshot.metrics.drafts_total }}</span>
+        </article>
+        <article class="metric card accent-amber">
+          <span class="metric-label">Latest Run Yield</span>
+          <strong>{{ snapshot.metrics.latest_run_saved }}</strong>
+          <span class="metric-foot">Qualified this run: {{ snapshot.metrics.latest_run_qualified }}</span>
+        </article>
+        <article class="metric card accent-coral">
+          <span class="metric-label">Source Reliability</span>
+          <strong>{{ snapshot.metrics.healthy_sources }}/{{ snapshot.metrics.sources_total }}</strong>
+          <span class="metric-foot">Recent pipeline success: {{ snapshot.metrics.pipeline_success_rate }}%</span>
+        </article>
+        <article class="metric card accent-sky">
+          <span class="metric-label">Publishing Progress</span>
+          <strong>{{ snapshot.metrics.approved_total }} / {{ snapshot.metrics.posted_total }}</strong>
+          <span class="metric-foot">Approved versus posted</span>
+        </article>
+      </section>
+
+      <section class="content-grid primary-grid">
+        <article class="card panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Run Throughput</h2>
+              <p>Saved-opportunity volume and failed-source signal across recent executions.</p>
+            </div>
+          </div>
+          {% if snapshot.run_series %}
+          <div class="bars">
+            {% for point in snapshot.run_series %}
+            <div class="bar-row">
+              <div class="bar-labels">
+                <span>{{ point.label }}</span>
+                <span>{{ point.saved }} saved / {{ point.qualified }} qualified</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill status-{{ point.status }}" style="width: {{ point.bar_width }}%;"></div>
+              </div>
+              <div class="bar-meta">{{ point.failed_sources }} failed sources</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty-state">No pipeline runs recorded yet.</p>
+          {% endif %}
+        </article>
+
+        <article class="card panel-side">
+          <div class="panel-head">
+            <div>
+              <h2>Last Run</h2>
+              <p>Most recent execution summary.</p>
+            </div>
+          </div>
+          {% if snapshot.last_run %}
+          <dl class="kv-list">
+            <div><dt>Status</dt><dd><span class="badge badge-{{ snapshot.last_run.status }}">{{ snapshot.last_run.status }}</span></dd></div>
+            <div><dt>Trigger</dt><dd>{{ snapshot.last_run.trigger }}</dd></div>
+            <div><dt>Sources</dt><dd>{{ snapshot.last_run.sources_succeeded }}/{{ snapshot.last_run.total_sources }} succeeded</dd></div>
+            <div><dt>Collected</dt><dd>{{ snapshot.last_run.total_items_collected }}</dd></div>
+            <div><dt>Qualified</dt><dd>{{ snapshot.last_run.total_items_qualified }}</dd></div>
+            <div><dt>Saved</dt><dd>{{ snapshot.last_run.total_items_saved }}</dd></div>
+            <div><dt>Duration</dt><dd>{{ snapshot.last_run.duration_ms or 0 }} ms</dd></div>
+            <div><dt>Started</dt><dd>{{ snapshot.last_run.started_at }}</dd></div>
+            {% if snapshot.last_run.digest_path %}
+            <div><dt>Digest</dt><dd class="mono">{{ snapshot.last_run.digest_path }}</dd></div>
+            {% endif %}
+          </dl>
+          {% if snapshot.last_run.error_message %}
+          <div class="alert">{{ snapshot.last_run.error_message }}</div>
+          {% endif %}
+          {% else %}
+          <p class="empty-state">No pipeline runs recorded yet.</p>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="content-grid secondary-grid">
+        <article class="card panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Recent Pipeline Runs</h2>
+              <p>Operational trail for the last execution windows.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Run</th>
+                  <th>Status</th>
+                  <th>Trigger</th>
+                  <th>Qualified</th>
+                  <th>Saved</th>
+                  <th>Failures</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if snapshot.recent_runs %}
+                  {% for run in snapshot.recent_runs %}
+                  <tr>
+                    <td>#{{ run.id }}</td>
+                    <td><span class="badge badge-{{ run.status }}">{{ run.status }}</span></td>
+                    <td>{{ run.trigger }}</td>
+                    <td>{{ run.total_items_qualified }}</td>
+                    <td>{{ run.total_items_saved }}</td>
+                    <td>{{ run.sources_failed }}</td>
+                    <td>{{ run.duration_ms or 0 }} ms</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="7" class="empty-cell">No pipeline runs available.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card panel-side">
+          <div class="panel-head">
+            <div>
+              <h2>Active Alerts</h2>
+              <p>Sources that need attention.</p>
+            </div>
+          </div>
+          {% if snapshot.source_alerts %}
+          <div class="alert-list">
+            {% for item in snapshot.source_alerts %}
+            <div class="alert-card">
+              <div class="alert-top">
+                <strong>{{ item.source_name }}</strong>
+                <span class="badge badge-{{ item.status }}">{{ item.status }}</span>
+              </div>
+              <p>{{ item.strategy }} strategy · {{ item.success_rate }}% success</p>
+              {% if item.error_message %}
+              <span class="alert-copy">{{ item.error_message }}</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty-state">No active source alerts.</p>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="content-grid tertiary-grid">
+        <article class="card panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Source Health</h2>
+              <p>Latest per-source status with rolling reliability and throughput.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source</th>
+                  <th>Status</th>
+                  <th>Strategy</th>
+                  <th>Success Rate</th>
+                  <th>Last Collected</th>
+                  <th>Last Saved</th>
+                  <th>Avg Saved</th>
+                  <th>Avg Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if snapshot.source_health %}
+                  {% for row in snapshot.source_health %}
+                  <tr>
+                    <td>
+                      <div class="source-name">{{ row.source_name }}</div>
+                      <a href="{{ row.source_url }}" target="_blank" rel="noreferrer">{{ row.source_type }}</a>
+                    </td>
+                    <td><span class="badge badge-{{ row.status }}">{{ row.status }}</span></td>
+                    <td>{{ row.strategy }}</td>
+                    <td>{{ row.success_rate }}%</td>
+                    <td>{{ row.last_collected }}</td>
+                    <td>{{ row.last_saved }}</td>
+                    <td>{{ row.average_saved }}</td>
+                    <td>{{ row.average_duration_ms }} ms</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="8" class="empty-cell">No source telemetry available yet.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card panel-side">
+          <div class="panel-head">
+            <div>
+              <h2>Portfolio Mix</h2>
+              <p>Opportunity distribution by category and workflow state.</p>
+            </div>
+          </div>
+          <div class="stack-section">
+            <h3>Categories</h3>
+            {% if snapshot.category_breakdown %}
+            <div class="stack-list">
+              {% for item in snapshot.category_breakdown %}
+              <div class="stack-row">
+                <div class="stack-meta"><span>{{ item.label }}</span><span>{{ item.count }}</span></div>
+                <div class="stack-track"><div class="stack-fill" style="width: {{ item.percentage }}%;"></div></div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">No opportunities stored yet.</p>
+            {% endif %}
+          </div>
+          <div class="stack-section">
+            <h3>Workflow</h3>
+            {% if snapshot.status_breakdown %}
+            <div class="stack-list small">
+              {% for item in snapshot.status_breakdown %}
+              <div class="stack-row">
+                <div class="stack-meta"><span>{{ item.label }}</span><span>{{ item.count }}</span></div>
+                <div class="stack-track"><div class="stack-fill alt" style="width: {{ item.percentage }}%;"></div></div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">Workflow state will appear after the first save.</p>
+            {% endif %}
+          </div>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="panel-head">
+          <div>
+            <h2>Recent Opportunities</h2>
+            <p>Latest stored items queued for review or publication.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Found</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if snapshot.recent_opportunities %}
+                {% for item in snapshot.recent_opportunities %}
+                <tr>
+                  <td><a href="{{ item.link }}" target="_blank" rel="noreferrer">{{ item.title }}</a></td>
+                  <td>{{ item.category }}</td>
+                  <td>{{ item.source_name }}</td>
+                  <td><span class="badge badge-{{ item.status }}">{{ item.status }}</span></td>
+                  <td>{{ '%.2f'|format(item.total_score) }}</td>
+                  <td>{{ item.date_found }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" class="empty-cell">No opportunities available yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

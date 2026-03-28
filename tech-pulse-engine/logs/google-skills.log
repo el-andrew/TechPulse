@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,130 INFO [tech_pulse.source.google-skills] Fetching HTML source: https://www.skills.google
+2026-03-03 12:47:44,130 ERROR [tech_pulse.source.google-skills] Failed to fetch https://www.skills.google: HTTPSConnectionPool(host='www.skills.google', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='www.skills.google', port=443): Failed to resolve 'www.skills.google' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:06,978 INFO [tech_pulse.source.google-skills] Fetching HTML source: https://www.skills.google
+2026-03-03 12:48:08,609 INFO [tech_pulse.source.google-skills] Collected 0 HTML entries
+2026-03-03 13:02:40,132 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-03 13:02:41,394 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries
+2026-03-03 13:06:49,934 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-03 13:06:50,977 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries

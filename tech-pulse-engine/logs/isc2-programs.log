@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,136 INFO [tech_pulse.source.isc2-programs] Fetching HTML source: https://www.isc2.org/landing
+2026-03-03 12:47:44,137 ERROR [tech_pulse.source.isc2-programs] Failed to fetch https://www.isc2.org/landing: HTTPSConnectionPool(host='www.isc2.org', port=443): Max retries exceeded with url: /landing (Caused by NameResolutionError("HTTPSConnection(host='www.isc2.org', port=443): Failed to resolve 'www.isc2.org' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:17,676 INFO [tech_pulse.source.isc2-programs] Fetching HTML source: https://www.isc2.org/landing
+2026-03-03 12:48:20,530 INFO [tech_pulse.source.isc2-programs] Collected 0 HTML entries
+2026-03-03 13:03:18,577 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-03 13:03:40,735 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
+2026-03-03 13:07:40,524 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-03 13:08:08,767 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries

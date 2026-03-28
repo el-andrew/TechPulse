@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,131 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source: https://www.netacad.com/courses/all-courses
+2026-03-03 12:47:44,131 ERROR [tech_pulse.source.cisco-networking-academy] Failed to fetch https://www.netacad.com/courses/all-courses: HTTPSConnectionPool(host='www.netacad.com', port=443): Max retries exceeded with url: /courses/all-courses (Caused by NameResolutionError("HTTPSConnection(host='www.netacad.com', port=443): Failed to resolve 'www.netacad.com' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:08,611 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source: https://www.netacad.com/courses/all-courses
+2026-03-03 12:48:09,648 INFO [tech_pulse.source.cisco-networking-academy] Collected 0 HTML entries
+2026-03-03 13:02:41,395 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-03 13:02:55,214 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries
+2026-03-03 13:06:50,978 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-03 13:06:58,276 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries

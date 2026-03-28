@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,132 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source: https://events.microsoft.com
+2026-03-03 12:47:44,136 ERROR [tech_pulse.source.microsoft-learn-events] Failed to fetch https://events.microsoft.com: HTTPSConnectionPool(host='events.microsoft.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='events.microsoft.com', port=443): Failed to resolve 'events.microsoft.com' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:09,654 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source: https://events.microsoft.com
+2026-03-03 12:48:17,674 INFO [tech_pulse.source.microsoft-learn-events] Collected 36 HTML entries
+2026-03-03 13:02:55,215 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
+2026-03-03 13:03:18,576 INFO [tech_pulse.source.microsoft-learn-events] Collected 6 HTML entries
+2026-03-03 13:06:58,277 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
+2026-03-03 13:07:40,523 INFO [tech_pulse.source.microsoft-learn-events] Collected 6 HTML entries

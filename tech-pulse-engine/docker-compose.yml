@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tech_pulse}
+      POSTGRES_USER: ${POSTGRES_USER:-techpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-techpulse}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-techpulse} -d ${POSTGRES_DB:-tech_pulse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+    image: tech-pulse-engine:${IMAGE_TAG:-latest}
+    environment: &app_environment
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://techpulse:techpulse@postgres:5432/tech_pulse}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-20}
+      USER_AGENT: ${USER_AGENT:-tech-pulse-engine/2.0}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DIGEST_PATH: ${DIGEST_PATH:-/data/daily_digest.md}
+      DAILY_RUN_HOUR: ${DAILY_RUN_HOUR:-7}
+      DAILY_RUN_MINUTE: ${DAILY_RUN_MINUTE:-0}
+      MIN_AFRICA_SCORE: ${MIN_AFRICA_SCORE:-0.50}
+      DASHBOARD_HOST: 0.0.0.0
+      DASHBOARD_PORT: 8080
+      DASHBOARD_TITLE: ${DASHBOARD_TITLE:-Tech Pulse Command Center}
+      DASHBOARD_REFRESH_SECONDS: ${DASHBOARD_REFRESH_SECONDS:-60}
+      RUN_INIT_DB: "1"
+      INIT_DB_ATTEMPTS: ${INIT_DB_ATTEMPTS:-20}
+      INIT_DB_DELAY_SECONDS: ${INIT_DB_DELAY_SECONDS:-3}
+    command: ["python", "-m", "app.main", "serve-dashboard", "--host", "0.0.0.0", "--port", "8080"]
+    ports:
+      - "${DASHBOARD_PORT:-8080}:8080"
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  scheduler:
+    image: tech-pulse-engine:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+    environment:
+      <<: *app_environment
+    command: ["python", "-m", "app.main", "schedule-daily"]
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app-runner:
+    image: tech-pulse-engine:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
+    profiles: ["manual"]
+    environment:
+      <<: *app_environment
+    command: ["python", "-m", "app.main", "run-daily", "--trigger", "docker-manual"]
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  postgres_data:

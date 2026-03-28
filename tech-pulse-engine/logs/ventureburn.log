@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,127 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
+2026-03-03 12:47:44,128 ERROR [tech_pulse.source.ventureburn] Failed to fetch https://ventureburn.com/feed/: HTTPSConnectionPool(host='ventureburn.com', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError("HTTPSConnection(host='ventureburn.com', port=443): Failed to resolve 'ventureburn.com' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:02,027 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
+2026-03-03 12:48:03,001 INFO [tech_pulse.source.ventureburn] Collected 10 RSS entries
+2026-03-03 13:02:21,689 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
+2026-03-03 13:02:22,907 INFO [tech_pulse.source.ventureburn] Collected 10 RSS entries
+2026-03-03 13:06:26,988 INFO [tech_pulse.source.ventureburn] Fetching RSS feed: https://ventureburn.com/feed/
+2026-03-03 13:06:28,094 INFO [tech_pulse.source.ventureburn] Collected 10 RSS entries

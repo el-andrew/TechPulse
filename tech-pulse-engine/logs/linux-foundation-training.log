@@ -1,0 +1,8 @@
+2026-03-03 12:47:44,129 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source: https://trainingportal.linuxfoundation.org/learn
+2026-03-03 12:47:44,129 ERROR [tech_pulse.source.linux-foundation-training] Failed to fetch https://trainingportal.linuxfoundation.org/learn: HTTPSConnectionPool(host='trainingportal.linuxfoundation.org', port=443): Max retries exceeded with url: /learn (Caused by NameResolutionError("HTTPSConnection(host='trainingportal.linuxfoundation.org', port=443): Failed to resolve 'trainingportal.linuxfoundation.org' ([Errno -2] Name or service not known)"))
+2026-03-03 12:48:03,003 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source: https://trainingportal.linuxfoundation.org/learn
+2026-03-03 12:48:06,977 INFO [tech_pulse.source.linux-foundation-training] Collected 0 HTML entries
+2026-03-03 13:02:22,908 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-03 13:02:40,131 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries
+2026-03-03 13:06:28,095 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-03 13:06:49,933 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries

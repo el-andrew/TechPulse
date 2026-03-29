@@ -3,14 +3,18 @@ from __future__ import annotations
 import unittest
 from datetime import datetime, timedelta
 
+from app.db.base import Base
 from app.db.models import Opportunity, PipelineRun, SourceRun
-from app.db.session import create_session_factory, session_scope
+from app.db.session import build_engine, session_scope
 from app.services.monitoring import build_dashboard_snapshot
+from sqlalchemy.orm import sessionmaker
 
 
 class MonitoringTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.session_factory = create_session_factory("sqlite:///:memory:")
+        self.engine = build_engine("sqlite:///:memory:")
+        Base.metadata.create_all(self.engine)
+        self.session_factory = sessionmaker(bind=self.engine, autoflush=False, autocommit=False, expire_on_commit=False, future=True)
         now = datetime.utcnow()
         with session_scope(self.session_factory) as session:
             run_one = PipelineRun(
@@ -84,10 +88,18 @@ class MonitoringTests(unittest.TestCase):
                         category="Training",
                         source_name="TechCabal",
                         link="https://example.com/1",
+                        application_url="https://example.com/1",
+                        country="Tanzania",
+                        audience_scope="tanzania",
+                        location_text="Dar es Salaam, Tanzania",
+                        issuer_name="TechCabal",
+                        source_priority=0.9,
                         africa_score=0.9,
+                        locality_score=0.7,
                         relevance_score=0.8,
                         total_score=0.85,
                         status="draft",
+                        whatsapp_channel="draft post",
                     ),
                     Opportunity(
                         title="Startup Demo Day",
@@ -95,10 +107,16 @@ class MonitoringTests(unittest.TestCase):
                         category="Event",
                         source_name="Disrupt Africa",
                         link="https://example.com/2",
+                        application_url="https://example.com/2",
+                        audience_scope="africa",
+                        issuer_name="Disrupt Africa",
+                        source_priority=0.7,
                         africa_score=0.85,
+                        locality_score=0.3,
                         relevance_score=0.7,
                         total_score=0.78,
                         status="approved",
+                        whatsapp_channel="channel copy",
                     ),
                 ]
             )
@@ -109,12 +127,13 @@ class MonitoringTests(unittest.TestCase):
 
         self.assertEqual(snapshot["metrics"]["opportunities_total"], 2)
         self.assertEqual(snapshot["metrics"]["drafts_total"], 1)
+        self.assertEqual(snapshot["metrics"]["tanzania_total"], 1)
         self.assertEqual(snapshot["last_run"]["status"], "partial_success")
         self.assertEqual(snapshot["source_health"][0]["source_name"], "TechCabal")
         self.assertEqual(snapshot["source_health"][0]["status"], "failed")
         self.assertEqual(snapshot["source_alerts"][0]["error_message"], "timeout")
-        self.assertEqual(snapshot["recent_opportunities"][0]["title"], "Startup Demo Day")
-        self.assertEqual(snapshot["run_series"][-1]["saved"], 6)
+        self.assertEqual(snapshot["recent_opportunities"][0]["location_label"], "Not stated")
+        self.assertEqual(snapshot["recent_opportunities"][1]["location_label"], "Dar es Salaam, Tanzania")
 
 
 if __name__ == "__main__":

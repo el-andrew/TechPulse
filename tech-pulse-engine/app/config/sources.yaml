@@ -1,9 +1,68 @@
 sources:
+  - name: Public Service Recruitment Secretariat
+    type: html
+    url: https://www.ajira.go.tz/
+    category_hint: job
+    africa_relevance_weight: 1.0
+    country: Tanzania
+    region: National
+    audience_scope: tanzania
+    issuer_name: Public Service Recruitment Secretariat
+    issuer_type: government
+    language: sw
+    source_priority: 1.0
+    location_text: Tanzania
+    strategy: generic
+    options:
+      max_items: 24
+      text_include_patterns:
+        - nafasi
+        - kazi
+        - ajira
+        - kuitwa
+
+  - name: COSTECH Funding
+    type: html
+    url: https://costech.or.tz/Funding
+    category_hint: grant
+    africa_relevance_weight: 0.98
+    country: Tanzania
+    region: Dar es Salaam
+    city: Dar es Salaam
+    audience_scope: tanzania
+    issuer_name: Tanzania Commission for Science and Technology
+    issuer_type: government
+    language: en
+    source_priority: 0.95
+    location_text: Dar es Salaam, Tanzania
+    strategy: single_page_detail
+    options:
+      generic_titles:
+        - Costech
+
+  - name: VETA INTEP Training
+    type: html
+    url: https://www.veta.go.tz/intep
+    category_hint: training
+    africa_relevance_weight: 0.95
+    country: Tanzania
+    region: Dodoma
+    city: Dodoma
+    audience_scope: tanzania
+    issuer_name: Vocational Education and Training Authority
+    issuer_type: government
+    language: en
+    source_priority: 0.9
+    location_text: Dodoma, Tanzania
+    strategy: single_page_detail
+
   - name: TechCabal
     type: rss
     url: https://techcabal.com/feed/
     category_hint: news
     africa_relevance_weight: 0.9
+    audience_scope: africa
+    source_priority: 0.62
     options:
       max_entries: 20
 
@@ -12,6 +71,8 @@ sources:
     url: https://disrupt-africa.com/feed/
     category_hint: accelerator
     africa_relevance_weight: 0.95
+    audience_scope: africa
+    source_priority: 0.7
     options:
       max_entries: 20
 
@@ -20,6 +81,8 @@ sources:
     url: https://ventureburn.com/feed/
     category_hint: startup
     africa_relevance_weight: 0.9
+    audience_scope: africa
+    source_priority: 0.62
     options:
       max_entries: 20
 
@@ -28,6 +91,8 @@ sources:
     url: https://www.opportunitiesforafricans.com/feed/
     category_hint: scholarship
     africa_relevance_weight: 0.95
+    audience_scope: africa
+    source_priority: 0.82
     options:
       max_entries: 25
 
@@ -36,6 +101,8 @@ sources:
     url: https://opportunitydesk.org/feed/
     category_hint: scholarship
     africa_relevance_weight: 0.88
+    audience_scope: africa
+    source_priority: 0.8
     options:
       max_entries: 25
 
@@ -44,6 +111,8 @@ sources:
     url: https://www.afrilabs.com/feed/
     category_hint: accelerator
     africa_relevance_weight: 0.9
+    audience_scope: africa
+    source_priority: 0.74
     options:
       max_entries: 20
 
@@ -52,6 +121,8 @@ sources:
     url: https://trainingportal.linuxfoundation.org/catalog
     category_hint: training
     africa_relevance_weight: 0.8
+    audience_scope: africa
+    source_priority: 0.58
     strategy: sitemap_detail
     options:
       sitemap_url: https://trainingportal.linuxfoundation.org/sitemap.xml
@@ -72,6 +143,8 @@ sources:
     url: https://www.skills.google/catalog
     category_hint: training
     africa_relevance_weight: 0.85
+    audience_scope: africa
+    source_priority: 0.66
     strategy: google_skills_catalog
     options:
       max_items: 18
@@ -81,6 +154,8 @@ sources:
     url: https://www.netacad.com/catalogs/learn
     category_hint: training
     africa_relevance_weight: 0.85
+    audience_scope: africa
+    source_priority: 0.64
     strategy: sitemap_detail
     options:
       sitemap_url: https://www.netacad.com/sitemap.xml
@@ -95,6 +170,8 @@ sources:
     url: https://events.microsoft.com
     category_hint: event
     africa_relevance_weight: 0.8
+    audience_scope: africa
+    source_priority: 0.55
     strategy: microsoft_events
     options:
       seed_urls:
@@ -110,6 +187,8 @@ sources:
     url: https://www.isc2.org/landing
     category_hint: certification
     africa_relevance_weight: 0.85
+    audience_scope: africa
+    source_priority: 0.64
     strategy: isc2_programs
     options:
       seed_urls:

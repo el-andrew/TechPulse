@@ -14,7 +14,7 @@ from app.collectors.rss import RSSCollector
 from app.config.settings import DEFAULT_SOURCES_PATH, Settings, load_sources
 from app.db.models import Opportunity, PipelineRun, SourceRun
 from app.db.session import session_scope
-from app.formatters.whatsapp import format_whatsapp_detailed, format_whatsapp_short
+from app.formatters.whatsapp import format_whatsapp_channel, format_whatsapp_detailed, format_whatsapp_short
 from app.parsers.classifier import classify_item
 from app.parsers.filtering import is_actionable_opportunity
 from app.parsers.models import CollectedItem, SourceConfig
@@ -72,7 +72,7 @@ class PipelineService:
             source_runs: dict[str, SourceRun] = {}
             processed_items = 0
             qualified_items = 0
-            failed_sources = 0
+            source_issue_count = 0
             candidate_items: list[CollectedItem] = []
 
             try:
@@ -82,17 +82,26 @@ class PipelineService:
                     source_run = self._start_source_run(session, pipeline_run.id, source)
                     source_runs[source.name] = source_run
                     try:
-                        raw_items = self._collect_source(source)
+                        raw_items, collection_errors = self._collect_source(source)
                         processed_items += len(raw_items)
                         source_run.items_collected = len(raw_items)
+                        source_run.error_message = collection_errors[0] if collection_errors else None
 
                         qualified = self._qualify_items(raw_items)
                         qualified_items += len(qualified)
                         source_run.items_qualified = len(qualified)
                         candidate_items.extend(qualified)
-                        source_run.status = "success"
+
+                        if collection_errors and raw_items:
+                            source_issue_count += 1
+                            source_run.status = "partial_success"
+                        elif collection_errors and not raw_items:
+                            source_issue_count += 1
+                            source_run.status = "failed"
+                        else:
+                            source_run.status = "success"
                     except Exception as exc:
-                        failed_sources += 1
+                        source_issue_count += 1
                         source_run.status = "failed"
                         source_run.error_message = _trim_error(exc)
                         logger.exception("Source processing failed for %s", source.name)
@@ -107,15 +116,15 @@ class PipelineService:
 
                 digest_path = self._write_daily_digest(saved)
                 completed_at = _utcnow()
-                pipeline_run.sources_failed = failed_sources
-                pipeline_run.sources_succeeded = len(sources) - failed_sources
+                pipeline_run.sources_failed = source_issue_count
+                pipeline_run.sources_succeeded = len(sources) - source_issue_count
                 pipeline_run.total_items_collected = processed_items
                 pipeline_run.total_items_qualified = qualified_items
                 pipeline_run.total_items_saved = len(saved)
                 pipeline_run.digest_path = str(digest_path)
                 pipeline_run.completed_at = completed_at
                 pipeline_run.duration_ms = _duration_ms(started_at, completed_at)
-                pipeline_run.status = "partial_success" if failed_sources else "success"
+                pipeline_run.status = "partial_success" if source_issue_count else "success"
                 session.flush()
 
                 return PipelineExecutionSummary(
@@ -124,7 +133,7 @@ class PipelineService:
                     processed_items=processed_items,
                     qualified_items=qualified_items,
                     saved_items=len(saved),
-                    failed_sources=failed_sources,
+                    failed_sources=source_issue_count,
                     total_sources=len(sources),
                     digest_path=digest_path,
                 )
@@ -138,7 +147,7 @@ class PipelineService:
 
                 pipeline_run.status = "failed"
                 pipeline_run.error_message = _trim_error(exc)
-                pipeline_run.sources_failed = max(failed_sources, len(sources) - pipeline_run.sources_succeeded)
+                pipeline_run.sources_failed = max(source_issue_count, len(sources) - pipeline_run.sources_succeeded)
                 pipeline_run.total_items_collected = processed_items
                 pipeline_run.total_items_qualified = qualified_items
                 pipeline_run.completed_at = completed_at
@@ -178,12 +187,13 @@ class PipelineService:
         source_run.duration_ms = _duration_ms(source_run.started_at, completed_at)
         session.flush()
 
-    def _collect_source(self, source: SourceConfig) -> list[CollectedItem]:
+    def _collect_source(self, source: SourceConfig) -> tuple[list[CollectedItem], list[str]]:
         collector_cls = COLLECTOR_MAP.get(source.type)
         if collector_cls is None:
             raise ValueError(f"Unsupported source type: {source.type}")
         collector = collector_cls(self.settings, source)
-        return collector.collect()
+        items = collector.collect()
+        return items, list(getattr(collector, "errors", []))
 
     def _qualify_items(self, items: list[CollectedItem]) -> list[CollectedItem]:
         qualified: list[CollectedItem] = []
@@ -205,8 +215,10 @@ class PipelineService:
                 continue
 
             ranked.link = canonicalize_link(ranked.link)
+            ranked.application_url = canonicalize_link(ranked.application_url or ranked.link)
             ranked.whatsapp_short = format_whatsapp_short(ranked)
             ranked.whatsapp_detailed = format_whatsapp_detailed(ranked)
+            ranked.whatsapp_channel = format_whatsapp_channel(ranked)
             qualified.append(ranked)
         return qualified
 
@@ -219,14 +231,26 @@ class PipelineService:
                 category=item.category or "Event",
                 source_name=item.source_name,
                 link=item.link,
+                application_url=item.application_url,
                 deadline=item.deadline,
                 event_date=item.event_date,
+                country=item.country,
+                region=item.region,
+                city=item.city,
+                audience_scope=item.audience_scope,
+                issuer_name=item.issuer_name,
+                issuer_type=item.issuer_type,
+                location_text=item.location_text,
+                language=item.language,
+                source_priority=item.source_priority,
                 africa_score=item.africa_score,
+                locality_score=item.locality_score,
                 relevance_score=item.relevance_score,
                 total_score=item.total_score,
                 status="draft",
                 whatsapp_short=item.whatsapp_short,
                 whatsapp_detailed=item.whatsapp_detailed,
+                whatsapp_channel=item.whatsapp_channel,
             )
             session.add(opportunity)
             saved.append(opportunity)
@@ -250,13 +274,16 @@ class PipelineService:
                 lines.append("")
                 for item in sorted(grouped[category], key=lambda current: current.total_score, reverse=True):
                     deadline = item.deadline.isoformat() if item.deadline else "N/A"
+                    location = item.location_text or ", ".join(part for part in [item.city, item.region, item.country] if part) or "Not stated"
                     lines.append(
-                        f"- **{item.title}** ({item.source_name}) | Score: {item.total_score:.2f} | Deadline: {deadline}"
+                        f"- **{item.title}** ({item.source_name}) | Score: {item.total_score:.2f} | Location: {location} | Deadline: {deadline}"
                     )
-                    lines.append(f"  - {item.link}")
+                    lines.append(f"  - {item.application_url or item.link}")
                 lines.append("")
 
-        output_path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
+        output_path.write_text("
+".join(lines).strip() + "
+", encoding="utf-8")
         return output_path
 
 

@@ -4,12 +4,12 @@ from app.parsers.models import CollectedItem
 
 
 CATEGORY_KEYWORDS = {
-    "Job": ["job", "hiring", "career", "vacancy", "internship", "role", "apply now"],
-    "Training": ["training", "course", "bootcamp", "learn", "academy", "certificate", "certification"],
+    "Job": ["job", "hiring", "career", "vacancy", "internship", "role", "apply now", "nafasi za kazi", "ajira"],
+    "Training": ["training", "course", "bootcamp", "learn", "academy", "certificate", "certification", "short course"],
     "Scholarship": ["scholarship", "fellowship", "bursary", "tuition"],
     "Accelerator": ["accelerator", "incubator", "cohort", "startup program"],
-    "Event": ["event", "summit", "webinar", "conference", "workshop", "meetup"],
-    "Grant": ["grant", "funding", "stipend", "seed fund", "prize", "award"],
+    "Event": ["event", "summit", "webinar", "conference", "workshop", "meetup", "hackathon"],
+    "Grant": ["grant", "funding", "stipend", "seed fund", "prize", "award", "innovation fund", "call for proposals"],
 }
 
 HINT_MAPPING = {
@@ -36,6 +36,8 @@ AFRICA_TERMS = [
     "ethiopia",
     "remote africa",
     "pan-african",
+    "east africa",
+    "east african",
 ]
 
 
@@ -53,4 +55,8 @@ def compute_africa_score(item: CollectedItem) -> float:
     matches = sum(1 for term in AFRICA_TERMS if term in haystack)
     if matches:
         score += min(0.2, matches * 0.05)
+    if item.country and item.country.lower() in {"tanzania", "kenya", "uganda", "rwanda", "ghana", "nigeria"}:
+        score += 0.05
+    if item.audience_scope in {"tanzania", "east_africa"}:
+        score += 0.05
     return min(score, 1.0)

@@ -13,7 +13,7 @@
         <div class="hero-copy">
           <p class="eyebrow">Operations Console</p>
           <h1>{{ settings.dashboard_title }}</h1>
-          <p class="lede">Monitor ingestion health, source reliability, qualification throughput, and publishing readiness from a single control surface.</p>
+          <p class="lede">Monitor ingestion health, Tanzania-local coverage, and prepare WhatsApp-ready opportunity posts from one operations surface.</p>
         </div>
         <div class="hero-meta">
           <span class="badge badge-{{ snapshot.last_run.status if snapshot.last_run else 'idle' }}">{{ snapshot.last_run.status if snapshot.last_run else 'idle' }}</span>
@@ -22,7 +22,7 @@
         </div>
       </header>
 
-      <section class="metrics-grid">
+      <section class="metrics-grid metrics-grid-five">
         <article class="metric card accent-teal">
           <span class="metric-label">Stored Opportunities</span>
           <strong>{{ snapshot.metrics.opportunities_total }}</strong>
@@ -39,6 +39,11 @@
           <span class="metric-foot">Recent pipeline success: {{ snapshot.metrics.pipeline_success_rate }}%</span>
         </article>
         <article class="metric card accent-sky">
+          <span class="metric-label">Tanzania Local</span>
+          <strong>{{ snapshot.metrics.tanzania_total }}</strong>
+          <span class="metric-foot">East Africa: {{ snapshot.metrics.east_africa_total }}</span>
+        </article>
+        <article class="metric card accent-teal">
           <span class="metric-label">Publishing Progress</span>
           <strong>{{ snapshot.metrics.approved_total }} / {{ snapshot.metrics.posted_total }}</strong>
           <span class="metric-foot">Approved versus posted</span>
@@ -64,7 +69,7 @@
               <div class="bar-track">
                 <div class="bar-fill status-{{ point.status }}" style="width: {{ point.bar_width }}%;"></div>
               </div>
-              <div class="bar-meta">{{ point.failed_sources }} failed sources</div>
+              <div class="bar-meta">{{ point.failed_sources }} sources with issues</div>
             </div>
             {% endfor %}
           </div>
@@ -268,7 +273,7 @@
         <div class="panel-head">
           <div>
             <h2>Recent Opportunities</h2>
-            <p>Latest stored items queued for review or publication.</p>
+            <p>Latest localized items queued for review, WhatsApp formatting, or publication.</p>
           </div>
         </div>
         <div class="table-wrap">
@@ -277,27 +282,32 @@
               <tr>
                 <th>Title</th>
                 <th>Category</th>
-                <th>Source</th>
+                <th>Location</th>
+                <th>Scope</th>
                 <th>Status</th>
                 <th>Score</th>
-                <th>Found</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {% if snapshot.recent_opportunities %}
                 {% for item in snapshot.recent_opportunities %}
                 <tr>
-                  <td><a href="{{ item.link }}" target="_blank" rel="noreferrer">{{ item.title }}</a></td>
+                  <td>
+                    <a href="{{ item.link }}" target="_blank" rel="noreferrer">{{ item.title }}</a>
+                    <div class="subtle-line">{{ item.issuer_name or item.source_name }}</div>
+                  </td>
                   <td>{{ item.category }}</td>
-                  <td>{{ item.source_name }}</td>
+                  <td>{{ item.location_label }}</td>
+                  <td>{{ item.scope_label }}</td>
                   <td><span class="badge badge-{{ item.status }}">{{ item.status }}</span></td>
                   <td>{{ '%.2f'|format(item.total_score) }}</td>
-                  <td>{{ item.date_found }}</td>
+                  <td><a class="button-link" href="/opportunities/{{ item.id }}">Open Composer</a></td>
                 </tr>
                 {% endfor %}
               {% else %}
                 <tr>
-                  <td colspan="6" class="empty-cell">No opportunities available yet.</td>
+                  <td colspan="7" class="empty-cell">No opportunities available yet.</td>
                 </tr>
               {% endif %}
             </tbody>

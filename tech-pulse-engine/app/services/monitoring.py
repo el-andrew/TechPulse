@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db.models import Opportunity, PipelineRun, SourceRun
+from app.formatters.whatsapp import build_location_label, build_scope_label
 
 
 STATUS_SEVERITY = {
@@ -27,6 +28,8 @@ def build_dashboard_snapshot(
     total_drafts = _count(session, Opportunity, Opportunity.status == "draft")
     total_approved = _count(session, Opportunity, Opportunity.status == "approved")
     total_posted = _count(session, Opportunity, Opportunity.status == "posted")
+    tanzania_total = _count(session, Opportunity, Opportunity.country == "Tanzania")
+    east_africa_total = _count(session, Opportunity, Opportunity.audience_scope == "east_africa")
 
     recent_runs = session.execute(
         select(PipelineRun).order_by(PipelineRun.started_at.desc(), PipelineRun.id.desc()).limit(recent_runs_limit)
@@ -56,6 +59,8 @@ def build_dashboard_snapshot(
             "drafts_total": total_drafts,
             "approved_total": total_approved,
             "posted_total": total_posted,
+            "tanzania_total": tanzania_total,
+            "east_africa_total": east_africa_total,
             "latest_run_saved": latest_run.total_items_saved if latest_run else 0,
             "latest_run_qualified": latest_run.total_items_qualified if latest_run else 0,
             "pipeline_success_rate": run_success_rate,
@@ -178,9 +183,15 @@ def _serialize_opportunity(item: Opportunity) -> dict[str, object]:
         "source_name": item.source_name,
         "status": item.status,
         "link": item.link,
+        "application_url": item.application_url or item.link,
         "total_score": item.total_score,
         "deadline": item.deadline.isoformat() if item.deadline else None,
         "date_found": _serialize_datetime(item.date_found),
+        "country": item.country,
+        "audience_scope": item.audience_scope,
+        "location_label": build_location_label(item),
+        "scope_label": build_scope_label(item),
+        "issuer_name": item.issuer_name,
     }
 
 

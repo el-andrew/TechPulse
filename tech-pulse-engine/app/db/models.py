@@ -26,9 +26,9 @@ class PipelineRun(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    source_runs: Mapped[list['SourceRun']] = relationship(
-        back_populates='pipeline_run',
-        cascade='all, delete-orphan',
+    source_runs: Mapped[list["SourceRun"]] = relationship(
+        back_populates="pipeline_run",
+        cascade="all, delete-orphan",
     )
 
 
@@ -50,7 +50,7 @@ class SourceRun(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    pipeline_run: Mapped[PipelineRun] = relationship(back_populates='source_runs')
+    pipeline_run: Mapped[PipelineRun] = relationship(back_populates="source_runs")
 
 
 class Opportunity(Base):
@@ -62,12 +62,24 @@ class Opportunity(Base):
     category: Mapped[str] = mapped_column(String(50), nullable=False)
     source_name: Mapped[str] = mapped_column(String(255), nullable=False)
     link: Mapped[str] = mapped_column(String(1024), nullable=False, unique=True, index=True)
+    application_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     event_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    country: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    region: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    audience_scope: Mapped[str] = mapped_column(String(32), nullable=False, default="africa", index=True)
+    issuer_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    issuer_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    location_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    language: Mapped[str] = mapped_column(String(32), nullable=False, default="en")
+    source_priority: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
     africa_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    locality_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     relevance_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     total_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     date_found: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     whatsapp_short: Mapped[str] = mapped_column(Text, nullable=False, default="")
     whatsapp_detailed: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    whatsapp_channel: Mapped[str] = mapped_column(Text, nullable=False, default="")

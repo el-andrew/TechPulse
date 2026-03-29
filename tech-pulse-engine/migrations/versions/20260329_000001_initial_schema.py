@@ -39,18 +39,32 @@ def upgrade() -> None:
         sa.Column("category", sa.String(length=50), nullable=False),
         sa.Column("source_name", sa.String(length=255), nullable=False),
         sa.Column("link", sa.String(length=1024), nullable=False),
+        sa.Column("application_url", sa.String(length=1024), nullable=True),
         sa.Column("deadline", sa.Date(), nullable=True),
         sa.Column("event_date", sa.Date(), nullable=True),
+        sa.Column("country", sa.String(length=64), nullable=True),
+        sa.Column("region", sa.String(length=128), nullable=True),
+        sa.Column("city", sa.String(length=128), nullable=True),
+        sa.Column("audience_scope", sa.String(length=32), nullable=False, server_default="africa"),
+        sa.Column("issuer_name", sa.String(length=255), nullable=True),
+        sa.Column("issuer_type", sa.String(length=64), nullable=True),
+        sa.Column("location_text", sa.String(length=255), nullable=True),
+        sa.Column("language", sa.String(length=32), nullable=False, server_default="en"),
+        sa.Column("source_priority", sa.Float(), nullable=False, server_default="0.5"),
         sa.Column("africa_score", sa.Float(), nullable=False, server_default="0"),
+        sa.Column("locality_score", sa.Float(), nullable=False, server_default="0"),
         sa.Column("relevance_score", sa.Float(), nullable=False, server_default="0"),
         sa.Column("total_score", sa.Float(), nullable=False, server_default="0"),
         sa.Column("date_found", sa.DateTime(), nullable=False),
         sa.Column("status", sa.String(length=20), nullable=False, server_default="draft"),
         sa.Column("whatsapp_short", sa.Text(), nullable=False, server_default=""),
         sa.Column("whatsapp_detailed", sa.Text(), nullable=False, server_default=""),
+        sa.Column("whatsapp_channel", sa.Text(), nullable=False, server_default=""),
         sa.UniqueConstraint("link", name="uq_opportunities_link"),
     )
     op.create_index("ix_opportunities_link", "opportunities", ["link"], unique=True)
+    op.create_index("ix_opportunities_country", "opportunities", ["country"])
+    op.create_index("ix_opportunities_audience_scope", "opportunities", ["audience_scope"])
 
     op.create_table(
         "source_runs",
@@ -83,6 +97,8 @@ def downgrade() -> None:
     op.drop_index("ix_source_runs_pipeline_run_id", table_name="source_runs")
     op.drop_table("source_runs")
 
+    op.drop_index("ix_opportunities_audience_scope", table_name="opportunities")
+    op.drop_index("ix_opportunities_country", table_name="opportunities")
     op.drop_index("ix_opportunities_link", table_name="opportunities")
     op.drop_table("opportunities")
 

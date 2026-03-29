@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from app.config.settings import Settings, load_settings
 from app.db.session import create_session_factory, session_scope
 from app.services.monitoring import build_dashboard_snapshot
+from app.services.opportunities import get_opportunity, refresh_templates, serialize_opportunity_detail, set_status
 
 
 def create_dashboard_app(settings: Settings | None = None) -> FastAPI:
@@ -46,6 +47,38 @@ def create_dashboard_app(settings: Settings | None = None) -> FastAPI:
             "settings": resolved_settings,
         }
         return templates.TemplateResponse("dashboard.html", context)
+
+    @app.get("/opportunities/{opportunity_id}", response_class=HTMLResponse)
+    async def opportunity_detail(request: Request, opportunity_id: int, notice: str | None = None) -> HTMLResponse:
+        with session_scope(session_factory) as session:
+            opportunity = get_opportunity(session, opportunity_id)
+            if opportunity is None:
+                raise HTTPException(status_code=404, detail="Opportunity not found")
+            context = {
+                "request": request,
+                "settings": resolved_settings,
+                "opportunity": serialize_opportunity_detail(opportunity),
+                "notice": notice,
+            }
+        return templates.TemplateResponse("opportunity.html", context)
+
+    @app.post("/opportunities/{opportunity_id}/compose")
+    async def compose_opportunity(opportunity_id: int) -> RedirectResponse:
+        with session_scope(session_factory) as session:
+            opportunity = get_opportunity(session, opportunity_id)
+            if opportunity is None:
+                raise HTTPException(status_code=404, detail="Opportunity not found")
+            refresh_templates(opportunity)
+        return RedirectResponse(url=f"/opportunities/{opportunity_id}?notice=Templates refreshed", status_code=303)
+
+    @app.post("/opportunities/{opportunity_id}/status/{status}")
+    async def update_opportunity_status(opportunity_id: int, status: str) -> RedirectResponse:
+        with session_scope(session_factory) as session:
+            opportunity = get_opportunity(session, opportunity_id)
+            if opportunity is None:
+                raise HTTPException(status_code=404, detail="Opportunity not found")
+            set_status(opportunity, status)
+        return RedirectResponse(url=f"/opportunities/{opportunity_id}?notice=Status updated", status_code=303)
 
     return app
 

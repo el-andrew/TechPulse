@@ -63,6 +63,40 @@ class RankingTests(unittest.TestCase):
         self.assertGreater(boosted.relevance_score, baseline.relevance_score)
         self.assertGreater(boosted.total_score, baseline.total_score)
 
+    def test_tanzania_scope_gets_locality_boost(self) -> None:
+        today = date(2026, 3, 3)
+        local = CollectedItem(
+            title="Ajira announcement for software officers",
+            description="Tanzania government jobs for graduates.",
+            source_name="PSRS",
+            source_type="html",
+            source_url="https://ajira.go.tz",
+            link="https://ajira.go.tz/example",
+            category_hint="job",
+            africa_relevance_weight=0.9,
+            country="Tanzania",
+            region="National",
+            audience_scope="tanzania",
+            source_priority=1.0,
+            location_text="Tanzania",
+        )
+        regional = CollectedItem(
+            title="East Africa internship program",
+            description="Regional opportunity for graduates.",
+            source_name="Regional Source",
+            source_type="html",
+            source_url="https://example.com",
+            link="https://example.com/regional",
+            category_hint="job",
+            africa_relevance_weight=0.9,
+            audience_scope="east_africa",
+            source_priority=0.5,
+        )
+        apply_ranking(local, today=today)
+        apply_ranking(regional, today=today)
+        self.assertGreater(local.locality_score, regional.locality_score)
+        self.assertGreater(local.total_score, regional.total_score)
+
 
 if __name__ == "__main__":
     unittest.main()

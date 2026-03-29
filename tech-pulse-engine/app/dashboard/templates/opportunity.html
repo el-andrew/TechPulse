@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ opportunity.title }} | {{ settings.dashboard_title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='dashboard.css') }}">
+  </head>
+  <body>
+    <div class="shell shell-narrow">
+      <header class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">WhatsApp Composer</p>
+          <h1>{{ opportunity.title }}</h1>
+          <p class="lede">Create, review, approve, and copy deterministic WhatsApp-ready posts for this opportunity.</p>
+        </div>
+        <div class="hero-meta hero-meta-left">
+          <span class="badge badge-{{ opportunity.status }}">{{ opportunity.status }}</span>
+          <a class="button-link" href="/dashboard">Back to Dashboard</a>
+        </div>
+      </header>
+
+      {% if notice %}
+      <section class="alert notice">{{ notice }}</section>
+      {% endif %}
+
+      <section class="content-grid primary-grid">
+        <article class="card panel-wide">
+          <div class="panel-head">
+            <div>
+              <h2>Opportunity Context</h2>
+              <p>Localized metadata and publishing inputs used by the template composer.</p>
+            </div>
+          </div>
+          <dl class="kv-list">
+            <div><dt>Category</dt><dd>{{ opportunity.category }}</dd></div>
+            <div><dt>Issuer</dt><dd>{{ opportunity.issuer_name or opportunity.source_name }}</dd></div>
+            <div><dt>Issuer Type</dt><dd>{{ opportunity.issuer_type or 'Not stated' }}</dd></div>
+            <div><dt>Location</dt><dd>{{ opportunity.location_label }}</dd></div>
+            <div><dt>Audience</dt><dd>{{ opportunity.scope_label }}</dd></div>
+            <div><dt>Deadline</dt><dd>{{ opportunity.deadline or 'Not stated' }}</dd></div>
+            <div><dt>Application URL</dt><dd class="mono">{{ opportunity.application_url }}</dd></div>
+            <div><dt>Total Score</dt><dd>{{ '%.2f'|format(opportunity.total_score) }}</dd></div>
+            <div><dt>Africa Score</dt><dd>{{ '%.2f'|format(opportunity.africa_score) }}</dd></div>
+            <div><dt>Locality Score</dt><dd>{{ '%.2f'|format(opportunity.locality_score) }}</dd></div>
+          </dl>
+          <div class="action-row">
+            <form method="post" action="/opportunities/{{ opportunity.id }}/compose">
+              <button class="action-button" type="submit">Refresh Templates</button>
+            </form>
+            <form method="post" action="/opportunities/{{ opportunity.id }}/status/approved">
+              <button class="action-button secondary" type="submit">Mark Approved</button>
+            </form>
+            <form method="post" action="/opportunities/{{ opportunity.id }}/status/posted">
+              <button class="action-button success" type="submit">Mark Posted</button>
+            </form>
+            <form method="post" action="/opportunities/{{ opportunity.id }}/status/draft">
+              <button class="action-button ghost" type="submit">Return to Draft</button>
+            </form>
+          </div>
+          <div class="description-block">
+            <h3>Source Summary</h3>
+            <p>{{ opportunity.description }}</p>
+          </div>
+        </article>
+
+        <article class="card panel-side">
+          <div class="panel-head">
+            <div>
+              <h2>Publish Checklist</h2>
+              <p>Deterministic template flow without LLM rewriting.</p>
+            </div>
+          </div>
+          <ul class="checklist">
+            <li>Verify deadline and application URL.</li>
+            <li>Check the localized audience and location tags.</li>
+            <li>Choose the short, detailed, or channel post variant.</li>
+            <li>Approve before posting to your WhatsApp channel.</li>
+          </ul>
+          <a class="button-link block-link" href="{{ opportunity.link }}" target="_blank" rel="noreferrer">Open Source Page</a>
+          <a class="button-link block-link" href="{{ opportunity.application_url }}" target="_blank" rel="noreferrer">Open Application Link</a>
+        </article>
+      </section>
+
+      <section class="composer-grid">
+        <article class="card composer-card">
+          <div class="panel-head compact-head">
+            <div>
+              <h2>Short WhatsApp Draft</h2>
+              <p>Compact version for fast sharing.</p>
+            </div>
+            <button class="action-button secondary" type="button" onclick="copyDraft('short-draft')">Copy</button>
+          </div>
+          <textarea id="short-draft" class="draft-box" readonly>{{ opportunity.whatsapp_short }}</textarea>
+        </article>
+
+        <article class="card composer-card">
+          <div class="panel-head compact-head">
+            <div>
+              <h2>Detailed WhatsApp Draft</h2>
+              <p>Richer message for review groups and admins.</p>
+            </div>
+            <button class="action-button secondary" type="button" onclick="copyDraft('detailed-draft')">Copy</button>
+          </div>
+          <textarea id="detailed-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_detailed }}</textarea>
+        </article>
+
+        <article class="card composer-card full-span">
+          <div class="panel-head compact-head">
+            <div>
+              <h2>WhatsApp Channel Post</h2>
+              <p>Channel-ready template for manual publishing.</p>
+            </div>
+            <button class="action-button success" type="button" onclick="copyDraft('channel-draft')">Copy Channel Post</button>
+          </div>
+          <textarea id="channel-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_channel }}</textarea>
+        </article>
+      </section>
+    </div>
+
+    <script>
+      function copyDraft(id) {
+        const element = document.getElementById(id);
+        if (!element) {
+          return;
+        }
+        element.select();
+        element.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(element.value);
+      }
+    </script>
+  </body>
+</html>

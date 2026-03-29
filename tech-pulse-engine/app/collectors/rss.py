@@ -14,14 +14,12 @@ class RSSCollector(BaseCollector):
     def collect(self) -> list[CollectedItem]:
         self.logger.info("Fetching RSS feed: %s", self.source.url)
         try:
-            response = requests.get(
-                self.source.url,
-                headers={"User-Agent": self.settings.user_agent},
-                timeout=self.settings.request_timeout,
-            )
+            response = self.http.get(self.source.url, timeout=self.settings.request_timeout)
             response.raise_for_status()
         except requests.RequestException as exc:
-            self.logger.error("Failed to fetch %s: %s", self.source.url, exc)
+            message = f"Failed to fetch {self.source.url}: {exc}"
+            self._record_error(message)
+            self.logger.error(message)
             return []
 
         feed = feedparser.parse(response.content)
@@ -38,7 +36,7 @@ class RSSCollector(BaseCollector):
                 or self._read_content_value(entry.get("content"))
                 or ""
             ).strip()
-            link = (entry.get("link") or "").strip()
+            link = (entry.get("link") or self.source.url).strip()
             published = entry.get("published") or entry.get("updated") or ""
             event_date = parse_date_text(published) if published else None
             if not event_date and published:
@@ -51,19 +49,16 @@ class RSSCollector(BaseCollector):
                 CollectedItem(
                     title=title,
                     description=summary,
-                    source_name=self.source.name,
-                    source_type=self.source.type,
-                    source_url=self.source.url,
-                    link=link,
-                    category_hint=self.source.category_hint,
-                    africa_relevance_weight=self.source.africa_relevance_weight,
                     deadline=parse_date_text(summary),
                     event_date=event_date,
+                    **self._base_item_fields(link),
                 )
             )
         self.logger.info("Collected %s RSS entries", len(items))
         if getattr(feed, "bozo", False):
-            self.logger.warning("Feed parsing reported malformed input for %s", self.source.url)
+            message = f"Feed parsing reported malformed input for {self.source.url}"
+            self._record_error(message)
+            self.logger.warning(message)
         return items
 
     @staticmethod

@@ -27,6 +27,7 @@ STRATEGY_MAP = {
     "sitemap_detail": "_collect_sitemap_detail",
     "microsoft_events": "_collect_microsoft_events",
     "isc2_programs": "_collect_isc2_programs",
+    "single_page_detail": "_collect_single_page_detail",
     "generic": "_collect_generic",
 }
 
@@ -112,11 +113,19 @@ class HTMLCollector(BaseCollector):
 
         return items[:max_items]
 
+    def _collect_single_page_detail(self) -> list[CollectedItem]:
+        item = self._extract_meta_item(self.source.url)
+        return [item] if item else []
+
     def _collect_generic(self) -> list[CollectedItem]:
         soup = self._fetch_soup(self.source.url)
         if not soup:
             return []
         containers = self._find_containers(soup)
+        max_items = int(self.source.options.get("max_items", 30))
+        include_patterns = [str(item).lower() for item in self.source.options.get("include_patterns", [])]
+        exclude_patterns = [str(item).lower() for item in self.source.options.get("exclude_patterns", [])]
+        text_include_patterns = [str(item).lower() for item in self.source.options.get("text_include_patterns", [])]
         items: list[CollectedItem] = []
         for container in containers[:100]:
             title = self._extract_text(container, "title")
@@ -125,6 +134,14 @@ class HTMLCollector(BaseCollector):
                 continue
             description = self._extract_text(container, "description")
             date_text = self._extract_text(container, "date")
+            link_lower = link.lower()
+            text_blob = f"{title} {description}".lower()
+            if include_patterns and not any(pattern in link_lower for pattern in include_patterns):
+                continue
+            if exclude_patterns and any(pattern in link_lower for pattern in exclude_patterns):
+                continue
+            if text_include_patterns and not any(pattern in text_blob for pattern in text_include_patterns):
+                continue
             items.append(
                 self._build_item(
                     title=title,
@@ -134,6 +151,8 @@ class HTMLCollector(BaseCollector):
                     event_date_text=date_text,
                 )
             )
+            if len(items) >= max_items:
+                break
         return items
 
     def _collect_isc2_training_items(self, soup: BeautifulSoup, page_url: str) -> list[CollectedItem]:
@@ -271,12 +290,13 @@ class HTMLCollector(BaseCollector):
         return custom or DEFAULT_SELECTORS[key]
 
     def _request(self, url: str) -> requests.Response | None:
-        headers = {"User-Agent": self.settings.user_agent}
         try:
-            response = requests.get(url, headers=headers, timeout=self.settings.request_timeout)
+            response = self.http.get(url, timeout=self.settings.request_timeout)
             response.raise_for_status()
         except requests.RequestException as exc:
-            self.logger.error("Failed to fetch %s: %s", url, exc)
+            message = f"Failed to fetch {url}: {exc}"
+            self._record_error(message)
+            self.logger.error(message)
             return None
         return response
 
@@ -304,14 +324,9 @@ class HTMLCollector(BaseCollector):
         return CollectedItem(
             title=cleaned_title,
             description=cleaned_description,
-            source_name=self.source.name,
-            source_type=self.source.type,
-            source_url=self.source.url,
-            link=normalized_link,
-            category_hint=self.source.category_hint,
-            africa_relevance_weight=self.source.africa_relevance_weight,
             deadline=parse_date_text(deadline_text or cleaned_description),
             event_date=parse_date_text(event_date_text or cleaned_description),
+            **self._base_item_fields(normalized_link),
         )
 
     def _dedupe_items(self, items: list[CollectedItem]) -> list[CollectedItem]:
@@ -343,7 +358,7 @@ class HTMLCollector(BaseCollector):
         return heading.get_text(" ", strip=True) if heading else ""
 
     def _clean_title(self, title: str) -> str:
-        cleaned = title.replace("\u2019", "'").strip()
+        cleaned = title.replace("’", "'").strip()
         for separator in ("|", " - "):
             if separator in cleaned:
                 cleaned = cleaned.split(separator)[0].strip()
@@ -382,6 +397,9 @@ class HTMLCollector(BaseCollector):
             "wan": "WAN",
             "wasmcloud": "WasmCloud",
             "webassembly": "WebAssembly",
+            "ajira": "Ajira",
+            "costech": "COSTECH",
+            "veta": "VETA",
         }
         code_prefixes = ("lfs", "lfd", "lfc", "lfel", "lfws", "kcna", "cka", "ckad", "cks")
         small_words = {"and", "for", "in", "of", "on", "the", "to", "with"}

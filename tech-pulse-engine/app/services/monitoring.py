@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.db.models import Opportunity, PipelineRun, SourceRun
@@ -17,13 +18,37 @@ STATUS_SEVERITY = {
     "success": 3,
 }
 
+SORT_OPTIONS = {"recent", "score", "deadline"}
+
+
+@dataclass(slots=True)
+class DashboardFilters:
+    query: str = ""
+    status: str = "all"
+    category: str = "all"
+    scope: str = "all"
+    country: str = "all"
+    sort: str = "recent"
+
+    def normalized(self) -> "DashboardFilters":
+        return DashboardFilters(
+            query=self.query.strip(),
+            status=self.status.strip().lower() or "all",
+            category=self.category.strip() or "all",
+            scope=self.scope.strip().lower() or "all",
+            country=self.country.strip() or "all",
+            sort=self.sort.strip().lower() if self.sort.strip().lower() in SORT_OPTIONS else "recent",
+        )
+
 
 def build_dashboard_snapshot(
     session: Session,
     *,
+    filters: DashboardFilters | None = None,
     recent_runs_limit: int = 10,
-    recent_opportunities_limit: int = 12,
+    recent_opportunities_limit: int = 24,
 ) -> dict[str, object]:
+    active_filters = (filters or DashboardFilters()).normalized()
     total_opportunities = _count(session, Opportunity)
     total_drafts = _count(session, Opportunity, Opportunity.status == "draft")
     total_approved = _count(session, Opportunity, Opportunity.status == "approved")
@@ -37,8 +62,12 @@ def build_dashboard_snapshot(
     latest_run = recent_runs[0] if recent_runs else None
 
     recent_opportunities = session.execute(
-        select(Opportunity).order_by(Opportunity.date_found.desc(), Opportunity.id.desc()).limit(recent_opportunities_limit)
+        _apply_opportunity_sort(
+            _apply_opportunity_filters(select(Opportunity), active_filters),
+            active_filters.sort,
+        ).limit(recent_opportunities_limit)
     ).scalars().all()
+    draft_queue = session.execute(_build_draft_queue_query(limit=6)).scalars().all()
     source_runs = session.execute(
         select(SourceRun).order_by(SourceRun.started_at.desc(), SourceRun.id.desc())
     ).scalars().all()
@@ -51,9 +80,21 @@ def build_dashboard_snapshot(
     successful_runs = sum(1 for run in recent_runs if run.status in {"success", "partial_success"})
     run_success_rate = round((successful_runs / len(recent_runs)) * 100, 1) if recent_runs else 0.0
     healthy_sources = sum(1 for item in source_health if item["status"] == "success")
+    featured_opportunity = draft_queue[0] if draft_queue else (recent_opportunities[0] if recent_opportunities else None)
 
     return {
         "generated_at": _serialize_datetime(datetime.utcnow()),
+        "filters": {
+            "current": {
+                "query": active_filters.query,
+                "status": active_filters.status,
+                "category": active_filters.category,
+                "scope": active_filters.scope,
+                "country": active_filters.country,
+                "sort": active_filters.sort,
+            },
+            "options": _build_filter_options(session),
+        },
         "metrics": {
             "opportunities_total": total_opportunities,
             "drafts_total": total_drafts,
@@ -74,6 +115,8 @@ def build_dashboard_snapshot(
         "status_breakdown": _with_percentages(status_breakdown),
         "source_health": source_health,
         "source_alerts": source_alerts,
+        "featured_opportunity": _serialize_opportunity(featured_opportunity, include_copy=True) if featured_opportunity else None,
+        "draft_queue": [_serialize_opportunity(item, include_copy=True) for item in draft_queue],
         "recent_opportunities": [_serialize_opportunity(item) for item in recent_opportunities],
     }
 
@@ -94,6 +137,23 @@ def _group_counts(session: Session, column) -> list[dict[str, object]]:
         .order_by(func.count(Opportunity.id).desc(), column.asc())
     )
     return [{"label": label, "count": count} for label, count in rows]
+
+
+def _build_filter_options(session: Session) -> dict[str, list[str]]:
+    return {
+        "statuses": ["all", *sorted(_distinct_values(session, Opportunity.status))],
+        "categories": ["all", *sorted(_distinct_values(session, Opportunity.category))],
+        "scopes": ["all", *sorted(_distinct_values(session, Opportunity.audience_scope))],
+        "countries": ["all", *sorted(_distinct_values(session, Opportunity.country))],
+        "sorts": ["recent", "score", "deadline"],
+    }
+
+
+def _distinct_values(session: Session, column) -> list[str]:
+    rows = session.execute(
+        select(column).where(column.is_not(None)).distinct().order_by(column.asc())
+    )
+    return [str(value) for value in rows.scalars().all() if value]
 
 
 def _build_source_health(source_runs: list[SourceRun]) -> list[dict[str, object]]:
@@ -175,8 +235,8 @@ def _serialize_pipeline_run(run: PipelineRun | None) -> dict[str, object] | None
     }
 
 
-def _serialize_opportunity(item: Opportunity) -> dict[str, object]:
-    return {
+def _serialize_opportunity(item: Opportunity, include_copy: bool = False) -> dict[str, object]:
+    payload = {
         "id": item.id,
         "title": item.title,
         "category": item.category,
@@ -192,7 +252,61 @@ def _serialize_opportunity(item: Opportunity) -> dict[str, object]:
         "location_label": build_location_label(item),
         "scope_label": build_scope_label(item),
         "issuer_name": item.issuer_name,
+        "deadline_label": item.deadline.isoformat() if item.deadline else "Not stated",
+        "short_preview": (item.whatsapp_short or item.description or "")[:220],
     }
+    if include_copy:
+        payload.update(
+            {
+                "whatsapp_short": item.whatsapp_short,
+                "whatsapp_detailed": item.whatsapp_detailed,
+                "whatsapp_channel": item.whatsapp_channel,
+            }
+        )
+    return payload
+
+
+def _apply_opportunity_filters(query, filters: DashboardFilters):
+    if filters.query:
+        term = f"%{filters.query.lower()}%"
+        query = query.where(
+            func.lower(Opportunity.title).like(term)
+            | func.lower(Opportunity.description).like(term)
+            | func.lower(func.coalesce(Opportunity.issuer_name, Opportunity.source_name)).like(term)
+        )
+    if filters.status != "all":
+        query = query.where(Opportunity.status == filters.status)
+    if filters.category != "all":
+        query = query.where(Opportunity.category == filters.category)
+    if filters.scope != "all":
+        query = query.where(Opportunity.audience_scope == filters.scope)
+    if filters.country != "all":
+        query = query.where(Opportunity.country == filters.country)
+    return query
+
+
+def _apply_opportunity_sort(query, sort: str):
+    if sort == "score":
+        return query.order_by(Opportunity.total_score.desc(), Opportunity.date_found.desc(), Opportunity.id.desc())
+    if sort == "deadline":
+        deadline_rank = case((Opportunity.deadline.is_(None), 1), else_=0)
+        return query.order_by(deadline_rank.asc(), Opportunity.deadline.asc(), Opportunity.total_score.desc(), Opportunity.id.desc())
+    return query.order_by(Opportunity.date_found.desc(), Opportunity.total_score.desc(), Opportunity.id.desc())
+
+
+def _build_draft_queue_query(*, limit: int):
+    status_rank = case(
+        (Opportunity.status == "draft", 0),
+        (Opportunity.status == "approved", 1),
+        (Opportunity.status == "posted", 2),
+        else_=3,
+    )
+    return (
+        select(Opportunity)
+        .where(Opportunity.status.in_(("draft", "approved")))
+        .order_by(status_rank.asc(), Opportunity.total_score.desc(), Opportunity.date_found.desc(), Opportunity.id.desc())
+        .limit(limit)
+    )
 
 
 def _with_percentages(items: list[dict[str, object]]) -> list[dict[str, object]]:

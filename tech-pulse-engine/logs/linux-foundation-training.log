@@ -11,3 +11,9 @@
 2026-03-28 22:39:09,173 INFO [tech_pulse.source.linux-foundation-training] Collected 0 HTML entries
 2026-03-28 22:56:35,799 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
 2026-03-28 22:57:06,717 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries
+2026-03-29 00:49:25,273 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-29 00:49:34,452 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries
+2026-03-29 01:42:19,096 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-29 01:42:30,346 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries
+2026-03-29 07:00:18,395 INFO [tech_pulse.source.linux-foundation-training] Fetching HTML source with strategy=sitemap_detail: https://trainingportal.linuxfoundation.org/catalog
+2026-03-29 07:00:32,003 INFO [tech_pulse.source.linux-foundation-training] Collected 15 HTML entries

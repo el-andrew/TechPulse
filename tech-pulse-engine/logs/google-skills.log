@@ -11,3 +11,9 @@
 2026-03-28 22:39:13,195 INFO [tech_pulse.source.google-skills] Collected 0 HTML entries
 2026-03-28 22:57:06,728 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
 2026-03-28 22:57:08,908 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries
+2026-03-29 00:49:34,461 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-29 00:49:36,375 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries
+2026-03-29 01:42:30,351 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-29 01:42:32,189 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries
+2026-03-29 07:00:32,007 INFO [tech_pulse.source.google-skills] Fetching HTML source with strategy=google_skills_catalog: https://www.skills.google/catalog
+2026-03-29 07:00:34,068 INFO [tech_pulse.source.google-skills] Collected 8 HTML entries

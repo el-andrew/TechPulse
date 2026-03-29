@@ -281,9 +281,7 @@ class PipelineService:
                     lines.append(f"  - {item.application_url or item.link}")
                 lines.append("")
 
-        output_path.write_text("
-".join(lines).strip() + "
-", encoding="utf-8")
+        output_path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
         return output_path
 
 

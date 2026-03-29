@@ -11,3 +11,9 @@
 2026-03-28 22:39:17,210 INFO [tech_pulse.source.cisco-networking-academy] Collected 0 HTML entries
 2026-03-28 22:57:08,913 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
 2026-03-28 22:57:29,498 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries
+2026-03-29 00:49:36,388 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-29 00:49:43,372 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries
+2026-03-29 01:42:32,194 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-29 01:42:38,692 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries
+2026-03-29 07:00:34,072 INFO [tech_pulse.source.cisco-networking-academy] Fetching HTML source with strategy=sitemap_detail: https://www.netacad.com/catalogs/learn
+2026-03-29 07:00:41,870 INFO [tech_pulse.source.cisco-networking-academy] Collected 18 HTML entries

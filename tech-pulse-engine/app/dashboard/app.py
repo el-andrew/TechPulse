@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config.settings import Settings, load_settings
 from app.db.session import create_session_factory, session_scope
-from app.services.monitoring import build_dashboard_snapshot
+from app.services.monitoring import DashboardFilters, build_dashboard_snapshot
 from app.services.opportunities import get_opportunity, refresh_templates, serialize_opportunity_detail, set_status
 
 
@@ -39,14 +39,26 @@ def create_dashboard_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/dashboard", response_class=HTMLResponse)
     async def dashboard(request: Request) -> HTMLResponse:
+        filters = DashboardFilters(
+            query=request.query_params.get("q", ""),
+            status=request.query_params.get("status", "all"),
+            category=request.query_params.get("category", "all"),
+            scope=request.query_params.get("scope", "all"),
+            country=request.query_params.get("country", "all"),
+            sort=request.query_params.get("sort", "recent"),
+        )
         with session_scope(session_factory) as session:
-            snapshot = build_dashboard_snapshot(session)
+            snapshot = build_dashboard_snapshot(session, filters=filters)
+        current_url = str(request.url.path)
+        if request.url.query:
+            current_url = f"{current_url}?{request.url.query}"
         context = {
             "request": request,
             "snapshot": snapshot,
             "settings": resolved_settings,
+            "dashboard_return_url": current_url,
         }
-        return templates.TemplateResponse("dashboard.html", context)
+        return templates.TemplateResponse(request, "dashboard.html", context)
 
     @app.get("/opportunities/{opportunity_id}", response_class=HTMLResponse)
     async def opportunity_detail(request: Request, opportunity_id: int, notice: str | None = None) -> HTMLResponse:
@@ -60,25 +72,31 @@ def create_dashboard_app(settings: Settings | None = None) -> FastAPI:
                 "opportunity": serialize_opportunity_detail(opportunity),
                 "notice": notice,
             }
-        return templates.TemplateResponse("opportunity.html", context)
+        return templates.TemplateResponse(request, "opportunity.html", context)
 
     @app.post("/opportunities/{opportunity_id}/compose")
-    async def compose_opportunity(opportunity_id: int) -> RedirectResponse:
+    async def compose_opportunity(request: Request, opportunity_id: int) -> RedirectResponse:
         with session_scope(session_factory) as session:
             opportunity = get_opportunity(session, opportunity_id)
             if opportunity is None:
                 raise HTTPException(status_code=404, detail="Opportunity not found")
             refresh_templates(opportunity)
-        return RedirectResponse(url=f"/opportunities/{opportunity_id}?notice=Templates refreshed", status_code=303)
+        return RedirectResponse(
+            url=await _resolve_next_url(request, f"/opportunities/{opportunity_id}?notice=Templates refreshed"),
+            status_code=303,
+        )
 
     @app.post("/opportunities/{opportunity_id}/status/{status}")
-    async def update_opportunity_status(opportunity_id: int, status: str) -> RedirectResponse:
+    async def update_opportunity_status(request: Request, opportunity_id: int, status: str) -> RedirectResponse:
         with session_scope(session_factory) as session:
             opportunity = get_opportunity(session, opportunity_id)
             if opportunity is None:
                 raise HTTPException(status_code=404, detail="Opportunity not found")
             set_status(opportunity, status)
-        return RedirectResponse(url=f"/opportunities/{opportunity_id}?notice=Status updated", status_code=303)
+        return RedirectResponse(
+            url=await _resolve_next_url(request, f"/opportunities/{opportunity_id}?notice=Status updated"),
+            status_code=303,
+        )
 
     return app
 
@@ -92,3 +110,13 @@ def serve_dashboard(settings: Settings | None = None, host: str | None = None, p
         port=port or resolved_settings.dashboard_port,
         log_level=resolved_settings.log_level.lower(),
     )
+
+
+async def _resolve_next_url(request: Request, default_url: str) -> str:
+    next_url = request.query_params.get("next")
+    if not next_url:
+        form = await request.form()
+        next_url = form.get("next")
+    if isinstance(next_url, str) and next_url.startswith("/"):
+        return next_url
+    return default_url

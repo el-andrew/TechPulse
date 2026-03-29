@@ -14,3 +14,10 @@
 2026-03-28 22:39:43,528 INFO [tech_pulse.source.microsoft-learn-events] Collected 2 HTML entries
 2026-03-28 22:57:29,514 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
 2026-03-28 22:57:49,808 INFO [tech_pulse.source.microsoft-learn-events] Collected 6 HTML entries
+2026-03-29 00:49:43,380 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
+2026-03-29 00:50:02,481 ERROR [tech_pulse.source.microsoft-learn-events] Failed to fetch https://ignite.microsoft.com/home: HTTPSConnectionPool(host='ignite.microsoft.com', port=443): Max retries exceeded with url: /home (Caused by NameResolutionError("HTTPSConnection(host='ignite.microsoft.com', port=443): Failed to resolve 'ignite.microsoft.com' ([Errno -5] No address associated with hostname)"))
+2026-03-29 00:50:12,662 INFO [tech_pulse.source.microsoft-learn-events] Collected 5 HTML entries
+2026-03-29 01:42:38,699 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
+2026-03-29 01:42:53,339 INFO [tech_pulse.source.microsoft-learn-events] Collected 6 HTML entries
+2026-03-29 07:00:41,875 INFO [tech_pulse.source.microsoft-learn-events] Fetching HTML source with strategy=microsoft_events: https://events.microsoft.com
+2026-03-29 07:01:03,444 INFO [tech_pulse.source.microsoft-learn-events] Collected 6 HTML entries

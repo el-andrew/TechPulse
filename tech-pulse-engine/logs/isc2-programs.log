@@ -10,3 +10,9 @@
 2026-03-28 22:40:04,371 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
 2026-03-28 22:57:49,821 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
 2026-03-28 22:58:11,833 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
+2026-03-29 00:50:12,673 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-29 00:50:22,477 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
+2026-03-29 01:42:53,347 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-29 01:43:02,977 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries
+2026-03-29 07:01:03,454 INFO [tech_pulse.source.isc2-programs] Fetching HTML source with strategy=isc2_programs: https://www.isc2.org/landing
+2026-03-29 07:01:19,637 INFO [tech_pulse.source.isc2-programs] Collected 9 HTML entries

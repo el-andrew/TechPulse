@@ -8,15 +8,15 @@
   </head>
   <body>
     <div class="shell shell-narrow">
-      <header class="hero card">
-        <div class="hero-copy">
+      <header class="card page-header">
+        <div class="header-copy">
           <p class="eyebrow">WhatsApp Composer</p>
           <h1>{{ opportunity.title }}</h1>
-          <p class="lede">Create, review, approve, and copy deterministic WhatsApp-ready posts for this opportunity.</p>
+          <p class="lede">Validate the details, choose the message variant that fits the moment, and record the publishing decision with as little friction as possible.</p>
         </div>
-        <div class="hero-meta hero-meta-left">
+        <div class="header-meta">
           <span class="badge badge-{{ opportunity.status }}">{{ opportunity.status }}</span>
-          <a class="button-link" href="/dashboard">Back to Dashboard</a>
+          <a class="button-link subtle" href="/dashboard">Back To Dashboard</a>
         </div>
       </header>
 
@@ -24,110 +24,149 @@
       <section class="alert notice">{{ notice }}</section>
       {% endif %}
 
-      <section class="content-grid primary-grid">
-        <article class="card panel-wide">
-          <div class="panel-head">
-            <div>
-              <h2>Opportunity Context</h2>
-              <p>Localized metadata and publishing inputs used by the template composer.</p>
+      <section class="composer-layout">
+        <div class="main-column">
+          <article class="card section-card">
+            <div class="section-head">
+              <div>
+                <h2>1. Check The Opportunity Details</h2>
+                <p>Everything you need to confirm before sharing this publicly.</p>
+              </div>
             </div>
-          </div>
-          <dl class="kv-list">
-            <div><dt>Category</dt><dd>{{ opportunity.category }}</dd></div>
-            <div><dt>Issuer</dt><dd>{{ opportunity.issuer_name or opportunity.source_name }}</dd></div>
-            <div><dt>Issuer Type</dt><dd>{{ opportunity.issuer_type or 'Not stated' }}</dd></div>
-            <div><dt>Location</dt><dd>{{ opportunity.location_label }}</dd></div>
-            <div><dt>Audience</dt><dd>{{ opportunity.scope_label }}</dd></div>
-            <div><dt>Deadline</dt><dd>{{ opportunity.deadline or 'Not stated' }}</dd></div>
-            <div><dt>Application URL</dt><dd class="mono">{{ opportunity.application_url }}</dd></div>
-            <div><dt>Total Score</dt><dd>{{ '%.2f'|format(opportunity.total_score) }}</dd></div>
-            <div><dt>Africa Score</dt><dd>{{ '%.2f'|format(opportunity.africa_score) }}</dd></div>
-            <div><dt>Locality Score</dt><dd>{{ '%.2f'|format(opportunity.locality_score) }}</dd></div>
-          </dl>
-          <div class="action-row">
-            <form method="post" action="/opportunities/{{ opportunity.id }}/compose">
-              <button class="action-button" type="submit">Refresh Templates</button>
-            </form>
-            <form method="post" action="/opportunities/{{ opportunity.id }}/status/approved">
-              <button class="action-button secondary" type="submit">Mark Approved</button>
-            </form>
-            <form method="post" action="/opportunities/{{ opportunity.id }}/status/posted">
-              <button class="action-button success" type="submit">Mark Posted</button>
-            </form>
-            <form method="post" action="/opportunities/{{ opportunity.id }}/status/draft">
-              <button class="action-button ghost" type="submit">Return to Draft</button>
-            </form>
-          </div>
-          <div class="description-block">
-            <h3>Source Summary</h3>
-            <p>{{ opportunity.description }}</p>
-          </div>
-        </article>
+            <dl class="kv-list">
+              <div><dt>Category</dt><dd>{{ opportunity.category }}</dd></div>
+              <div><dt>Issuer</dt><dd>{{ opportunity.issuer_name or opportunity.source_name }}</dd></div>
+              <div><dt>Issuer Type</dt><dd>{{ opportunity.issuer_type or 'Not stated' }}</dd></div>
+              <div><dt>Location</dt><dd>{{ opportunity.location_label }}</dd></div>
+              <div><dt>Audience</dt><dd>{{ opportunity.scope_label }}</dd></div>
+              <div><dt>Deadline</dt><dd>{{ opportunity.deadline or 'Not stated' }}</dd></div>
+              <div><dt>Application URL</dt><dd class="mono">{{ opportunity.application_url }}</dd></div>
+              <div><dt>Source URL</dt><dd class="mono">{{ opportunity.link }}</dd></div>
+              <div><dt>Total Score</dt><dd>{{ '%.2f'|format(opportunity.total_score) }}</dd></div>
+            </dl>
+            <div class="description-block">
+              <h3>Source Summary</h3>
+              <p>{{ opportunity.description }}</p>
+            </div>
+          </article>
 
-        <article class="card panel-side">
-          <div class="panel-head">
-            <div>
-              <h2>Publish Checklist</h2>
-              <p>Deterministic template flow without LLM rewriting.</p>
+          <article class="card section-card">
+            <div class="section-head">
+              <div>
+                <h2>2. Choose The Message Variant</h2>
+                <p>Short for fast sharing, detailed for review groups, and channel for public posting.</p>
+              </div>
             </div>
-          </div>
-          <ul class="checklist">
-            <li>Verify deadline and application URL.</li>
-            <li>Check the localized audience and location tags.</li>
-            <li>Choose the short, detailed, or channel post variant.</li>
-            <li>Approve before posting to your WhatsApp channel.</li>
-          </ul>
-          <a class="button-link block-link" href="{{ opportunity.link }}" target="_blank" rel="noreferrer">Open Source Page</a>
-          <a class="button-link block-link" href="{{ opportunity.application_url }}" target="_blank" rel="noreferrer">Open Application Link</a>
-        </article>
-      </section>
+            <div class="draft-stack">
+              <article class="draft-panel">
+                <div class="draft-head">
+                  <div>
+                    <h3>Short Message</h3>
+                    <p>Quick to scan and easy to forward.</p>
+                  </div>
+                  <button class="action-button secondary copy-button" type="button" data-copy-target="short-draft">Copy</button>
+                </div>
+                <textarea id="short-draft" class="draft-box" readonly>{{ opportunity.whatsapp_short }}</textarea>
+              </article>
 
-      <section class="composer-grid">
-        <article class="card composer-card">
-          <div class="panel-head compact-head">
-            <div>
-              <h2>Short WhatsApp Draft</h2>
-              <p>Compact version for fast sharing.</p>
-            </div>
-            <button class="action-button secondary" type="button" onclick="copyDraft('short-draft')">Copy</button>
-          </div>
-          <textarea id="short-draft" class="draft-box" readonly>{{ opportunity.whatsapp_short }}</textarea>
-        </article>
+              <article class="draft-panel">
+                <div class="draft-head">
+                  <div>
+                    <h3>Detailed Message</h3>
+                    <p>Useful when internal reviewers need more context.</p>
+                  </div>
+                  <button class="action-button secondary copy-button" type="button" data-copy-target="detailed-draft">Copy</button>
+                </div>
+                <textarea id="detailed-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_detailed }}</textarea>
+              </article>
 
-        <article class="card composer-card">
-          <div class="panel-head compact-head">
-            <div>
-              <h2>Detailed WhatsApp Draft</h2>
-              <p>Richer message for review groups and admins.</p>
+              <article class="draft-panel">
+                <div class="draft-head">
+                  <div>
+                    <h3>Channel Post</h3>
+                    <p>Ready for your public WhatsApp channel workflow.</p>
+                  </div>
+                  <button class="action-button success copy-button" type="button" data-copy-target="channel-draft">Copy Channel Post</button>
+                </div>
+                <textarea id="channel-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_channel }}</textarea>
+              </article>
             </div>
-            <button class="action-button secondary" type="button" onclick="copyDraft('detailed-draft')">Copy</button>
-          </div>
-          <textarea id="detailed-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_detailed }}</textarea>
-        </article>
+          </article>
+        </div>
 
-        <article class="card composer-card full-span">
-          <div class="panel-head compact-head">
-            <div>
-              <h2>WhatsApp Channel Post</h2>
-              <p>Channel-ready template for manual publishing.</p>
+        <aside class="side-column">
+          <article class="card section-card">
+            <div class="section-head">
+              <div>
+                <h2>3. Complete The Publishing Task</h2>
+                <p>Record the state change once you have reviewed the copy.</p>
+              </div>
             </div>
-            <button class="action-button success" type="button" onclick="copyDraft('channel-draft')">Copy Channel Post</button>
-          </div>
-          <textarea id="channel-draft" class="draft-box draft-large" readonly>{{ opportunity.whatsapp_channel }}</textarea>
-        </article>
+            <div class="task-checklist">
+              <div class="task-step">
+                <strong>Confirm the details</strong>
+                <p>Check deadline, audience, and application link.</p>
+              </div>
+              <div class="task-step">
+                <strong>Pick the right draft</strong>
+                <p>Choose short, detailed, or channel based on where this is going.</p>
+              </div>
+              <div class="task-step">
+                <strong>Update the workflow state</strong>
+                <p>Keep the dashboard honest by marking the outcome.</p>
+              </div>
+            </div>
+            <div class="action-stack">
+              <form method="post" action="/opportunities/{{ opportunity.id }}/compose">
+                <button class="action-button primary wide" type="submit">Refresh Templates</button>
+              </form>
+              <form method="post" action="/opportunities/{{ opportunity.id }}/status/approved">
+                <button class="action-button secondary wide" type="submit">Mark Approved</button>
+              </form>
+              <form method="post" action="/opportunities/{{ opportunity.id }}/status/posted">
+                <button class="action-button success wide" type="submit">Mark Posted</button>
+              </form>
+              <form method="post" action="/opportunities/{{ opportunity.id }}/status/draft">
+                <button class="action-button ghost wide" type="submit">Return To Draft</button>
+              </form>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-head">
+              <div>
+                <h2>Reference Links</h2>
+                <p>Open the original materials without losing your place.</p>
+              </div>
+            </div>
+            <div class="shortcut-list">
+              <a class="shortcut-link" href="{{ opportunity.link }}" target="_blank" rel="noreferrer">Open Source Page</a>
+              <a class="shortcut-link" href="{{ opportunity.application_url }}" target="_blank" rel="noreferrer">Open Application Link</a>
+            </div>
+          </article>
+        </aside>
       </section>
     </div>
 
     <script>
-      function copyDraft(id) {
-        const element = document.getElementById(id);
+      function copyDraft(button) {
+        const targetId = button.getAttribute("data-copy-target");
+        const element = document.getElementById(targetId);
         if (!element) {
           return;
         }
-        element.select();
-        element.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(element.value);
+        navigator.clipboard.writeText(element.value).then(() => {
+          const original = button.textContent;
+          button.textContent = "Copied";
+          window.setTimeout(() => {
+            button.textContent = original;
+          }, 1200);
+        });
       }
+
+      document.querySelectorAll(".copy-button").forEach((button) => {
+        button.addEventListener("click", () => copyDraft(button));
+      });
     </script>
   </body>
 </html>

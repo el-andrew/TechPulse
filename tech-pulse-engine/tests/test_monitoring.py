@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from app.db.base import Base
 from app.db.models import Opportunity, PipelineRun, SourceRun
 from app.db.session import build_engine, session_scope
-from app.services.monitoring import build_dashboard_snapshot
+from app.services.monitoring import DashboardFilters, build_dashboard_snapshot
 from sqlalchemy.orm import sessionmaker
 
 
@@ -134,6 +134,17 @@ class MonitoringTests(unittest.TestCase):
         self.assertEqual(snapshot["source_alerts"][0]["error_message"], "timeout")
         self.assertEqual(snapshot["recent_opportunities"][0]["location_label"], "Not stated")
         self.assertEqual(snapshot["recent_opportunities"][1]["location_label"], "Dar es Salaam, Tanzania")
+
+    def test_build_dashboard_snapshot_applies_filters_and_queue(self) -> None:
+        with session_scope(self.session_factory) as session:
+            snapshot = build_dashboard_snapshot(session, filters=DashboardFilters(status="approved", sort="score"))
+
+        self.assertEqual(snapshot["filters"]["current"]["status"], "approved")
+        self.assertEqual(len(snapshot["recent_opportunities"]), 1)
+        self.assertEqual(snapshot["recent_opportunities"][0]["status"], "approved")
+        self.assertEqual(snapshot["draft_queue"][0]["status"], "draft")
+        self.assertEqual(snapshot["featured_opportunity"]["id"], snapshot["draft_queue"][0]["id"])
+        self.assertIn("whatsapp_channel", snapshot["draft_queue"][0])
 
 
 if __name__ == "__main__":
